@@ -1,12 +1,40 @@
-type Item = {
+type RadioItem = {
   name: string;
-  tagName: string;
-  type?: string;
+  tagName: "input";
+  type: "radio";
   label: string;
-  placeholder?: string;
-  values?: { label: string; value: number }[];
-  options?: { text: string; value: number }[];
+  values: { label: string; value: number }[];
 };
+
+type CheckboxItem = {
+  name: string;
+  tagName: "input";
+  type: "checkbox";
+  label: string;
+  values: { label: string; value: number }[];
+};
+
+type DefaultInputItem = {
+  name: string;
+  tagName: "input";
+  type: "text" | "email" | "tel";
+  label: string;
+  placeholder: string;
+};
+
+type Item =
+  | RadioItem
+  | CheckboxItem
+  | DefaultInputItem
+  | {
+      name: string;
+      tagName: "select" | "textarea";
+      type?: string;
+      label: string;
+      placeholder?: string;
+      values?: { label: string; value: number }[];
+      options?: { text: string; value: number }[];
+    };
 
 const items: Item[] = [
   {
@@ -80,14 +108,54 @@ const items: Item[] = [
 // _____________________________________________________________________________
 //
 
+function createRadioRow(item: RadioItem) {
+  return `
+  <tr>
+    <th>
+      <label>${item.label}</label>
+    </th>
+    <td>
+      ${item.values
+        .map(
+          (value) => `
+          <input type="radio" id="${value.label}" name="${item.name}" value="${value.value}" />
+          <label for="${value.label}">${value.label}</label>
+        `
+        )
+        .join("")}
+    </td>
+  </tr>
+`;
+}
+
+function createCheckboxRow(item: CheckboxItem) {
+  return `
+  <tr>
+    <th>
+      <label>${item.label}</label>
+    </th>
+    <td>
+      ${item.values
+        .map(
+          (value) => `
+          <input type="checkbox" id="${value.label}" name="${item.name}" value="${value.value}" />
+          <label for="${value.label}">${value.label}</label>
+        `
+        )
+        .join("")}
+    </td>
+  </tr>
+`;
+}
+
 function createInputRow(item: Item) {
   return `
     <tr>
       <th>
-        <label></label>
+        <label>${item.label}</label>
       </th>
       <td>
-        <input />
+        <input type="${item.type}" name="${item.name}" placeholder="${item.placeholder}" />
       </td>
     </tr>
   `;
@@ -125,6 +193,8 @@ function createTable() {
     .map((item) => {
       switch (item.tagName) {
         case "input":
+          if (item.type === "radio") return createRadioRow(item);
+          if (item.type === "checkbox") return createCheckboxRow(item);
           return createInputRow(item);
         case "select":
           return createSelectRow(item);
@@ -138,6 +208,7 @@ function createTable() {
 
 function createFormDom() {
   const form = document.getElementById("form");
+  if (!form) return;
   form.innerHTML = createTable();
 }
 
