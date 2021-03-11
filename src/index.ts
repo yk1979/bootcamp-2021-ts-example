@@ -22,19 +22,26 @@ type DefaultInputItem = {
   placeholder: string;
 };
 
+type SelectItem = {
+  name: string;
+  label: string;
+  tagName: "select";
+  options: { text: string; value: number }[];
+};
+
+type TextareaItem = {
+  name: string;
+  label: string;
+  tagName: "textarea";
+  placeholder: string;
+};
+
 type Item =
   | RadioItem
   | CheckboxItem
   | DefaultInputItem
-  | {
-      name: string;
-      tagName: "select" | "textarea";
-      type?: string;
-      label: string;
-      placeholder?: string;
-      values?: { label: string; value: number }[];
-      options?: { text: string; value: number }[];
-    };
+  | SelectItem
+  | TextareaItem;
 
 const items: Item[] = [
   {
@@ -148,7 +155,7 @@ function createCheckboxRow(item: CheckboxItem) {
 `;
 }
 
-function createInputRow(item: Item) {
+function createInputRow(item: DefaultInputItem) {
   return `
     <tr>
       <th>
@@ -161,28 +168,33 @@ function createInputRow(item: Item) {
   `;
 }
 
-function createSelectRow(item: Item) {
+function createSelectRow(item: SelectItem) {
   return `
     <tr>
       <th>
-        <label></label>
+        <label>${item.label}</label>
       </th>
       <td>
         <select>
+          ${item.options.map(
+            (option) => `
+            <option value="${option.value}">${option.text}</option>
+          `
+          )}
         </select>
       </td>
     </tr>
   `;
 }
 
-function createTextAreaRow(item: Item) {
+function createTextAreaRow(item: TextareaItem) {
   return `
     <tr>
       <th>
-        <label></label>
+        <label>${item.label}</label>
       </th>
       <td>
-        <textarea></textarea>
+        <textarea placeholder="${item.placeholder}"></textarea>
       </td>
     </tr>
   `;
